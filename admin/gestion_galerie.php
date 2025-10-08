@@ -85,7 +85,7 @@ $galerie = $conn->query("SELECT * FROM galerie ORDER BY created_at DESC")->fetch
         <?php endif; ?>
 
         <form method="post" class="form-add" enctype="multipart/form-data">
-            <input type="text" name="titre" placeholder="Titre (facultatif)">
+            <input type="text" name="titre" placeholder="Titre">
             <input type="file" name="image" accept="image/*" required>
             <button type="submit" name="ajouter">Ajouter</button>
         </form>

@@ -1,6 +1,10 @@
 <?php
 session_start();
+require('config.php');
 $page_title = "Accueil - Sénégal Phyto";
+
+// Récupérer les pubs (images ou vidéos)
+$pubs = $conn->query("SELECT * FROM pubs ORDER BY created_at DESC LIMIT 6")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -10,7 +14,7 @@ $page_title = "Accueil - Sénégal Phyto";
 <body>
     <?php include 'includes/navbar.php'; ?>
     
-    <!-- Hero Section -->
+    
     <section class="hero">
         <div class="hero-overlay"></div> 
         <div class="container">
@@ -91,31 +95,51 @@ $page_title = "Accueil - Sénégal Phyto";
         </div>
     </section>
 
-    <!-- Section Produits & Fournitures -->
-<section class="produits-section">
-    <div class="container">
-        <h2>Produits & Fournitures</h2>
-        <div class="produits-grid">
-            <div class="produit-card">
-                <div class="produit-icon">🔧</div>
-                <h3>Équipements & Matériel</h3>
-                <p>Matériel professionnel pour tous vos traitements</p>
-            </div>
-            <div class="produit-card">
-                <div class="produit-icon">🧪</div>
-                <h3>Produits Phytosanitaires</h3>
-                <p>Produits certifiés pour une protection optimale</p>
+    <!-- Produits & Fournitures -->
+    <section class="produits-section">
+        <div class="container">
+            <h2>Produits & Fournitures</h2>
+            <div class="produits-grid">
+                <div class="produit-card">
+                    <div class="produit-icon">🔧</div>
+                    <h3>Équipements & Matériel</h3>
+                    <p>Matériel professionnel pour tous vos traitements</p>
+                </div>
+                <div class="produit-card">
+                    <div class="produit-icon">🧪</div>
+                    <h3>Produits Phytosanitaires</h3>
+                    <p>Produits certifiés pour une protection optimale</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-    <!-- Publicités Dynamiques -->
+    <!-- 🟢 Publicités -->
     <section class="publicites-section">
         <div class="container">
             <h2>Nos Offres Spéciales</h2>
-            <div class="publicites-slider" id="publicitesSlider">
-                <!-- Les publicités seront chargées dynamiquement via JS -->
+            <div class="publicites-grid">
+                <?php if (count($pubs) > 0): ?>
+                    <?php foreach ($pubs as $pub): ?>
+                        <div class="pub-item">
+                            <?php
+                            $fichier = htmlspecialchars($pub['media']);
+                            $extension = strtolower(pathinfo($fichier, PATHINFO_EXTENSION));
+                            if (in_array($extension, ['mp4', 'webm', 'avi'])):
+                            ?>
+                                <video width="300" controls>
+                                    <source src="admin/uploads/<?= $fichier ?>" type="video/<?= $extension ?>">
+                                    Votre navigateur ne supporte pas la lecture de vidéos.
+                                </video>
+                            <?php else: ?>
+                                <img src="uploads/<?= $fichier ?>" alt="<?= htmlspecialchars($pub['titre']) ?>" width="300">
+                            <?php endif; ?>
+                            <h3><?= htmlspecialchars($pub['titre']) ?></h3>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Aucune publicité disponible pour le moment.</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -123,7 +147,7 @@ $page_title = "Accueil - Sénégal Phyto";
     <!-- Call to Action -->
     <section class="cta-section">
         <div class="container">
-            <h2>Prêt à protéger votre environnement?</h2>
+            <h2>Prêt à protéger votre environnement ?</h2>
             <p>Contactez-nous dès aujourd'hui pour un devis gratuit</p>
             <a href="contact.php" class="btn-primary">Demander un devis</a>
         </div>
