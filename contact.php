@@ -1,11 +1,42 @@
 <?php
 session_start();
+require 'config.php';
 $page_title = "Contact - Sénégal Phyto";
+
+$success = $error = "";
+
+// Enregistrement en base de données
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $nom = trim($_POST['nom']);
+    $email = trim($_POST['email']);
+    $telephone = trim($_POST['telephone']);
+    $service = trim($_POST['service']);
+    $message = trim($_POST['message']);
+
+    if (!empty($nom) && !empty($email) && !empty($message) && !empty($service)) {
+        $stmt = $conn->prepare("INSERT INTO messages (nom, email, telephone, sujet, message, statut, created_at)
+                                VALUES (?, ?, ?, ?, ?, 'non_lu', NOW())");
+        if ($stmt->execute([$nom, $email, $telephone, $service, $message])) {
+            $success = "✅ Message envoyé avec succès !";
+        } else {
+            $error = "❌ Une erreur est survenue lors de l'envoi du message.";
+        }
+    } else {
+        $error = "⚠️ Veuillez remplir tous les champs obligatoires.";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <?php include 'includes/header.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        (function(){
+            // Initialise EmailJS
+            emailjs.init("T1kUBZXUypYXqCRX-5"); 
+        })();
+    </script>
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
@@ -23,16 +54,21 @@ $page_title = "Contact - Sénégal Phyto";
                 <div class="contact-grid">
                     <div class="contact-form-section">
                         <h2>Demandez un devis gratuit</h2>
-                        <form id="contactForm" class="contact-form">
+
+                        <?php if ($success): ?>
+                            <div class="alert success"><?= $success ?></div>
+                        <?php elseif ($error): ?>
+                            <div class="alert error"><?= $error ?></div>
+                        <?php endif; ?>
+
+                        <form id="contactForm" class="contact-form" method="POST">
                             <div class="form-group">
                                 <label for="nom">Nom complet *</label>
                                 <input type="text" id="nom" name="nom" required>
-                                <span class="error-message"></span>
                             </div>
                             <div class="form-group">
                                 <label for="email">Email *</label>
                                 <input type="email" id="email" name="email" required>
-                                <span class="error-message"></span>
                             </div>
                             <div class="form-group">
                                 <label for="telephone">Téléphone</label>
@@ -42,18 +78,16 @@ $page_title = "Contact - Sénégal Phyto";
                                 <label for="service">Service concerné *</label>
                                 <select id="service" name="service" required>
                                     <option value="">Sélectionnez un service</option>
-                                    <option value="desinsectisation">Désinsectisation</option>
-                                    <option value="desinfection">Désinfection</option>
-                                    <option value="deratisation">Dératisation</option>
-                                    <option value="fumigation">Fumigation</option>
-                                    <option value="autre">Autre</option>
+                                    <option value="Désinsectisation">Désinsectisation</option>
+                                    <option value="Désinfection">Désinfection</option>
+                                    <option value="Dératisation">Dératisation</option>
+                                    <option value="Fumigation">Fumigation</option>
+                                    <option value="Autre">Autre</option>
                                 </select>
-                                <span class="error-message"></span>
                             </div>
                             <div class="form-group">
                                 <label for="message">Message *</label>
                                 <textarea id="message" name="message" rows="5" required></textarea>
-                                <span class="error-message"></span>
                             </div>
                             <button type="submit" class="btn-primary">Envoyer le message</button>
                         </form>
@@ -145,8 +179,8 @@ $page_title = "Contact - Sénégal Phyto";
             <div class="container">
                 <h2>Notre zone d'intervention</h2>
                 <div class="map-container">
-                    <!-- Intégration Google Maps -->
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.527315774243!2d-17.44478728471664!3d14.692277189756952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec172fe3c5d5d7b%3A0x5e26d2f5e5e5e5e5!2sDakar%2C%20S%C3%A9n%C3%A9gal!5e0!3m2!1sfr!2sfr!4v1620000000000!5m2!1sfr!2sfr" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.527315774243!2d-17.44478728471664!3d14.692277189756952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec172fe3c5d5d7b%3A0x5e26d2f5e5e5e5e5!2sDakar%2C%20S%C3%A9n%C3%A9gal!5e0!3m2!1sfr!2sfr!4v1620000000000!5m2!1sfr!2sfr" 
+                            width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
             </div>
         </section>
@@ -154,6 +188,35 @@ $page_title = "Contact - Sénégal Phyto";
 
     <?php include 'includes/footer.php'; ?>
     <script src="assets/js/script.js"></script>
-    <script src="assets/js/contact.js"></script>
+    <script>
+        document.getElementById("contactForm").addEventListener("submit", function(e){
+            // Empêche l’envoi double si le backend recharge la page
+            e.preventDefault();
+
+            const form = this;
+
+            // Enregistre d'abord dans la base via PHP
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            }).then(response => response.text())
+            .then(() => {
+                // Envoi du mail via EmailJS
+                emailjs.send("service_7e9d5mo", "template_912sw6b", {
+                    nom: document.getElementById("nom").value,
+                    email: document.getElementById("email").value,
+                    telephone: document.getElementById("telephone").value,
+                    service: document.getElementById("service").value,
+                    message: document.getElementById("message").value
+                }).then(() => {
+                    alert("✅ Message envoyé et mail transmis avec succès !");
+                    form.reset();
+                }).catch(err => {
+                    alert("❌ Erreur EmailJS : " + JSON.stringify(err));
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>
