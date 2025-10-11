@@ -30,7 +30,7 @@ $images = $conn->query("SELECT * FROM galerie ORDER BY created_at DESC")->fetchA
                         <?php foreach ($images as $img): ?>
                             <div class="galerie-item" data-category="realisations">
                                 <div class="galerie-image">
-                                    <img src="uploads/<?= htmlspecialchars($img['image']) ?>" alt="<?= htmlspecialchars($img['titre']) ?>">
+                                    <img src="<?= htmlspecialchars($img['image']) ?>" alt="<?= htmlspecialchars($img['titre']) ?>">
                                     <div class="galerie-overlay">
                                         <h3><?= htmlspecialchars($img['titre']) ?></h3>
                                         <p>Ajouté le <?= date("d/m/Y", strtotime($img['created_at'])) ?></p>
