@@ -5,19 +5,31 @@ $page_title = "Contact - Sénégal Phyto";
 
 $success = $error = "";
 
-// Enregistrement en base de données
+// Traitement du POST (insertion en base)
+// Quand insertion OK on stocke temporairement les données dans $_SESSION['last_message']
+// puis on REDIRIGE (PRG) vers contact.php?sent=1 pour éviter le re-post au refresh.
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $nom = trim($_POST['nom']);
-    $email = trim($_POST['email']);
-    $telephone = trim($_POST['telephone']);
-    $service = trim($_POST['service']);
-    $message = trim($_POST['message']);
+    $nom = trim($_POST['nom'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $telephone = trim($_POST['telephone'] ?? '');
+    $service = trim($_POST['sujet'] ?? '');
+    $message = trim($_POST['message'] ?? '');
 
     if (!empty($nom) && !empty($email) && !empty($message) && !empty($service)) {
         $stmt = $conn->prepare("INSERT INTO messages (nom, email, telephone, sujet, message, statut, created_at)
                                 VALUES (?, ?, ?, ?, ?, 'non_lu', NOW())");
         if ($stmt->execute([$nom, $email, $telephone, $service, $message])) {
-            $success = "✅ Message envoyé avec succès !";
+            // Stocke temporairement les données à envoyer par EmailJS
+            $_SESSION['last_message'] = [
+                'nom' => $nom,
+                'email' => $email,
+                'telephone' => $telephone,
+                'sujet' => $service,
+                'message' => $message
+            ];
+            // redirect (PRG)
+            header('Location: contact.php?sent=1');
+            exit;
         } else {
             $error = "❌ Une erreur est survenue lors de l'envoi du message.";
         }
@@ -25,22 +37,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "⚠️ Veuillez remplir tous les champs obligatoires.";
     }
 }
+// Si on arrive en GET, on affiche le formulaire.
+// Si ?sent=1 est présent et $_SESSION['last_message'] existe, le JS client s'en chargera.
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <?php include 'includes/header.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script>
-        (function(){
-            // Initialise EmailJS
-            emailjs.init("T1kUBZXUypYXqCRX-5"); 
-        })();
-    </script>
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
-    
+
     <main class="contact-page">
         <section class="page-header">
             <div class="container">
@@ -55,13 +63,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <div class="contact-form-section">
                         <h2>Demandez un devis gratuit</h2>
 
-                        <?php if ($success): ?>
-                            <div class="alert success"><?= $success ?></div>
-                        <?php elseif ($error): ?>
-                            <div class="alert error"><?= $error ?></div>
+                        <?php if (!empty($error)): ?>
+                            <div class="alert error"><?= htmlspecialchars($error) ?></div>
                         <?php endif; ?>
 
-                        <form id="contactForm" class="contact-form" method="POST">
+                        <form id="contactForm" class="contact-form" method="POST" action="contact.php">
                             <div class="form-group">
                                 <label for="nom">Nom complet *</label>
                                 <input type="text" id="nom" name="nom" required>
@@ -75,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <input type="tel" id="telephone" name="telephone">
                             </div>
                             <div class="form-group">
-                                <label for="service">Service concerné *</label>
-                                <select id="service" name="service" required>
+                                <label for="sujet">Service concerné *</label>
+                                <select id="sujet" name="sujet" required>
                                     <option value="">Sélectionnez un service</option>
                                     <option value="Désinsectisation">Désinsectisation</option>
                                     <option value="Désinfection">Désinfection</option>
@@ -117,106 +123,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                     <p>Dakar, Sénégal</p>
                                 </div>
                             </div>
-                            <div class="contact-item">
-                                <div class="contact-icon">🕒</div>
-                                <div class="contact-details">
-                                    <h3>Horaires d'ouverture</h3>
-                                    <p>Lun - Ven: 8h00 - 18h00<br>Sam: 8h00 - 13h00</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="social-links">
-                            <h3>Suivez-nous</h3>
-                            <div class="social-icons">
-                                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="faq-section">
-            <div class="container">
-                <h2>Questions fréquentes</h2>
-                <div class="faq-accordion">
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <span>Combien de temps dure une intervention?</span>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>La durée varie selon le type d'intervention et la superficie à traiter. En moyenne, une intervention dure entre 1 et 3 heures.</p>
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <span>Les produits utilisés sont-ils dangereux?</span>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Nous utilisons des produits homologués et respectueux de l'environnement. Nos techniciens vous donneront toutes les consignes de sécurité.</p>
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <span>Proposez-vous des contrats d'entretien?</span>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Oui, nous proposons des contrats d'entretien annuels adaptés à vos besoins pour une protection continue.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="map-section">
-            <div class="container">
-                <h2>Notre zone d'intervention</h2>
-                <div class="map-container">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.527315774243!2d-17.44478728471664!3d14.692277189756952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec172fe3c5d5d7b%3A0x5e26d2f5e5e5e5e5!2sDakar%2C%20S%C3%A9n%C3%A9gal!5e0!3m2!1sfr!2sfr!4v1620000000000!5m2!1sfr!2sfr" 
-                            width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
             </div>
         </section>
     </main>
 
     <?php include 'includes/footer.php'; ?>
-    <script src="assets/js/script.js"></script>
+
     <script>
-        document.getElementById("contactForm").addEventListener("submit", function(e){
-            // Empêche l’envoi double si le backend recharge la page
-            e.preventDefault();
+    document.addEventListener("DOMContentLoaded", function () {
+        // ====== Remplace par ta clé publique EmailJS ======
+        emailjs.init("tevLp9FBLNQB3FLet");
 
-            const form = this;
-
-            // Enregistre d'abord dans la base via PHP
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            }).then(response => response.text())
-            .then(() => {
-                // Envoi du mail via EmailJS
-                emailjs.send("service_7e9d5mo", "template_912sw6b", {
-                    nom: document.getElementById("nom").value,
-                    email: document.getElementById("email").value,
-                    telephone: document.getElementById("telephone").value,
-                    service: document.getElementById("service").value,
-                    message: document.getElementById("message").value
-                }).then(() => {
-                    alert("✅ Message envoyé et mail transmis avec succès !");
-                    form.reset();
-                }).catch(err => {
-                    alert("❌ Erreur EmailJS : " + JSON.stringify(err));
+        // Si l'URL contient ?sent=1, on tente d'envoyer via EmailJS une seule fois
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('sent') === '1') {
+            // Appel server pour récupérer la session last_message (renvoie JSON)
+            fetch('get_last_message.php')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.nom) {
+                        // Envoi EmailJS
+                        emailjs.send("service_7e9d5mo", "template_912sw6b", {
+                            nom: data.nom,
+                            email: data.email,
+                            telephone: data.telephone,
+                            sujet: data.sujet,
+                            message: data.message
+                        })
+                        .then(() => {
+                            console.log("✅ Email envoyé via EmailJS");
+                            // Supprime côté serveur la session last_message
+                            return fetch('reset_session.php', { method: 'POST' });
+                        })
+                        .then(() => {
+                            // Enlève le paramètre ?sent=1 de l'URL pour éviter renvoi sur refresh
+                            history.replaceState(null, '', 'contact.php');
+                            // Optionnel : afficher un toast / notification côté client
+                            alert('✅ Message envoyé. Nous vous répondrons bientôt.');
+                        })
+                        .catch(err => {
+                            console.error("❌ Erreur EmailJS :", err);
+                        });
+                    } else {
+                        // Pas de données : éventuellement déja reset ; on nettoie l'URL
+                        history.replaceState(null, '', 'contact.php');
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur fetch get_last_message:", err);
+                    history.replaceState(null, '', 'contact.php');
                 });
-            });
-        });
+        }
+    });
     </script>
-
 </body>
 </html>
