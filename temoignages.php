@@ -10,6 +10,8 @@ $temoignages = $conn->query("SELECT * FROM temoignages WHERE statut='approuve' O
 <html lang="fr">
 <head>
     <?php include 'includes/header.php'; ?>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <?php include 'includes/navbar.php'; ?>
@@ -74,7 +76,7 @@ $temoignages = $conn->query("SELECT * FROM temoignages WHERE statut='approuve' O
         </div>
     </section>
 
-    <!-- Formulaire d’ajout -->
+    <!-- Formulaire d'ajout -->
     <section class="add-testimonial-section">
         <div class="container">
             <div class="add-testimonial-form">
@@ -101,23 +103,50 @@ $temoignages = $conn->query("SELECT * FROM temoignages WHERE statut='approuve' O
 <script>
 document.getElementById('testimonialForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
     const formData = new FormData(this);
+    const form = this;
 
-    fetch('ajouter_temoignage.php', {
+    // Afficher un loader
+    Swal.fire({
+        title: 'Envoi en cours...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch('ajouter_temoignages.php', {
         method: 'POST',
         body: formData
     })
-    .then(res => res.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur réseau: ' + response.status);
+        }
+        return response.json();
+    })
     .then(data => {
-        alert(data.message);
+        Swal.close();
+        
         if (data.success) {
-            this.reset();
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès !',
+                text: data.message,
+                confirmButtonColor: '#006400'
+            }).then(() => {
+                form.reset();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: data.message,
+                confirmButtonColor: '#d33'
+            });
         }
     })
-    .catch(err => {
-        console.error(err);
-        alert("Erreur lors de l'envoi du témoignage.");
-    });
 });
 </script>
 </body>

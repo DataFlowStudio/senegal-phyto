@@ -84,7 +84,10 @@ $pubs = $conn->query("SELECT * FROM pubs ORDER BY created_at DESC")->fetchAll();
 
 <style>
     main {
-        padding: 20px;
+    margin-left: 20px; 
+    padding: 25px;
+    background: #f9f9f9;
+    min-height: calc(100vh - 120px);
     }
     h2 {
         display: flex;

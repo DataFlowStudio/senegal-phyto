@@ -29,6 +29,13 @@ $messages = $conn->query("SELECT COUNT(*) FROM messages")->fetchColumn();
 
 <style>
     /* === Spécifique au Dashboard === */
+    main {
+    margin-left: 20px; 
+    padding: 25px;
+    color: #fff;
+    background: #f9f9f9;
+    min-height: calc(100vh - 120px);
+    }
     .dashboard-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -72,10 +79,18 @@ $messages = $conn->query("SELECT COUNT(*) FROM messages")->fetchColumn();
     }
 
     /* Couleurs des cartes */
-    .card-pubs i { color: #f39c12; }
-    .card-temoignages i { color: #2E8B57; }
-    .card-galerie i { color: #3498db; }
-    .card-messages i { color: #c0392b; }
+    .card-pubs i { 
+        color: #f39c12; 
+    }
+    .card-temoignages i { 
+        color: #2E8B57; 
+    }
+    .card-galerie i { 
+        color: #3498db; 
+    }
+    .card-messages i {
+         color: #c0392b; 
+    }
 
     main h2 {
         display: flex;

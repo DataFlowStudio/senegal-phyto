@@ -43,34 +43,45 @@ $temoignages = $conn->query("SELECT * FROM temoignages ORDER BY created_at DESC"
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
+    .container {
+        display: flex;
+        flex: 1;
+    }
+    
     main {
+        flex: 1;
         background: #fff;
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin: 20px;
     }
+    
     h2 {
         display: flex;
         align-items: center;
         gap: 10px;
         color: #333;
     }
+    
     table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
         font-family: Arial, sans-serif;
     }
+    
     th, td {
         border: 1px solid #ddd;
         padding: 10px;
         text-align: left;
     }
+    
     th {
         background-color: #4CAF50;
         color: white;
     }
+    
     tr:nth-child(even) {
         background-color: #f9f9f9;
     }
@@ -83,15 +94,19 @@ $temoignages = $conn->query("SELECT * FROM temoignages ORDER BY created_at DESC"
         border-radius: 6px;
         transition: background 0.2s ease;
     }
+    
     .approve {
         color: #28a745;
     }
+    
     .approve:hover {
         background: #e7fbe7;
     }
+    
     .delete {
         color: #e74c3c;
     }
+    
     .delete:hover {
         background: #fdecea;
     }

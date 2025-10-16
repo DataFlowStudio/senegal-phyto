@@ -114,7 +114,7 @@ $pubs = $conn->query("SELECT * FROM pubs ORDER BY created_at DESC LIMIT 6")->fet
         </div>
     </section>
 
-    <!-- 🟢 Publicités -->
+    <!-- Publicités -->
     <section class="publicites-section">
         <div class="container">
             <h2>Nos Offres Spéciales</h2>

@@ -3,7 +3,7 @@
         <i class="fa-solid fa-leaf sidebar-logo"></i>
         <span class="sidebar-title">Sénégal Phyto</span>
     </div>
-
+ 
     <ul class="sidebar-menu">
         <li><a href="dashboard.php" class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>"><i class="fa-solid fa-chart-line"></i> Tableau de bord</a></li>
         <li><a href="gestion_pubs.php" class="<?= basename($_SERVER['PHP_SELF']) == 'gestion_pubs.php' ? 'active' : '' ?>"><i class="fa-solid fa-bullhorn"></i> Gestion des Pubs</a></li>
@@ -17,17 +17,14 @@
 /* === SIDEBAR === */
 .main-sidebar {
     width: 240px;
-    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(180deg, #006400, #2E8B57);
     color: #fff;
-    position: fixed;
-    top: 0;
-    left: 0;
     display: flex;
     flex-direction: column;
     padding-top: 10px;
     box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-    z-index: 99;
+    flex-shrink: 0;
 }
 
 .sidebar-header {

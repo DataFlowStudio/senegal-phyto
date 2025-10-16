@@ -81,7 +81,7 @@ body {
 .phyto-hero {
     font-family: 'Marko One', serif;
     font-size: 3.5rem;
-    font-weight: 400; /* REGULAR */
+    font-weight: 400; 
     color: var(--white);
     letter-spacing: 4px;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
